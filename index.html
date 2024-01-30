@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoリスト</title>
+    <style>
+        /* ここにCSSスタイルを追加して、見た目をカスタマイズできます */
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ToDoリスト</h1>
+
+    <form id="todoForm">
+        <label for="task">タスクを追加:</label>
+        <input type="text" id="task" name="task" required>
+        <button type="button" onclick="addTask()">追加</button>
+        <br>
+        <button type="button" onclick="displayTasks()">表示</button>
+        <button type="button" onclick="resetForm()">リセット</button>
+    </form>
+
+    <ul id="taskList">
+        <!-- タスクがここに追加されます -->
+    </ul>
+
+    <script>
+        async function addTask() {
+            // フォームからタスクを取得
+            var taskInput = document.getElementById('task');
+            var taskText = taskInput.value;
+
+            // タスクをバックエンドに追加
+            var response = await fetch("/add_task", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({task: taskText}),
+            });
+
+            if (response.ok) {
+                // タスクリストを再表示
+                displayTasks();
+            } else {
+                console.error('Failed to add task');
+            }
+
+            // 入力フィールドをクリア
+            taskInput.value = '';
+        }
+
+        async function displayTasks() {
+            // タスクリストを取得
+            var response = await fetch("/get_tasks");
+            var res = await response.json();
+            console.log(res)
+            // タスクリストを表示
+            var taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            res.tasks.forEach(task => {
+                var newTask = document.createElement('li');
+                newTask.textContent = task;
+                taskList.appendChild(newTask);
+            });
+        }
+
+        function resetForm() {
+            // フォームをリセット
+            window.location.reload();
+        }
+    </script>
+
+</body>
+</html>
